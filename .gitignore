@@ -1,0 +1,7 @@
+input.txt
+*.txt
+Cargo.lock
+Cargo.toml
+main
+target/*
+target
