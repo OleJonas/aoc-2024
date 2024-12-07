@@ -1,6 +1,9 @@
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
+use std::error::Error;
+use std::convert::TryFrom;
+use std::num::TryFromIntError;
 
 const ms: [char; 2] = ['M','S'];
 const directions: [[i32; 2]; 4] = [
@@ -11,7 +14,7 @@ const directions: [[i32; 2]; 4] = [
 ];
 
 fn main() {
-    const file_name: &str = "../sample-input.txt";
+    const file_name: &str = "../input.txt";
     let mut xmas_matrix: Vec<Vec<char>> = Vec::new();
 
     if let Ok(lines) = read_lines(file_name){
@@ -25,7 +28,10 @@ fn main() {
     for i in 1..xmas_matrix.len()-1 {
         for j in 1..xmas_matrix[i].len()-1 {
             if xmas_matrix[i][j] == 'A' {
-                count += check_for_cross_mas(&xmas_matrix, [i,j]);
+                let cross_mas = check_for_cross_mas(&xmas_matrix, [i,j]);
+                if cross_mas.is_ok() {
+                    count += cross_mas.unwrap();
+                }
             }
         }
     }
@@ -37,40 +43,25 @@ fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>> wher
     Ok(io::BufReader::new(file).lines())
 }
 
+fn check_for_cross_mas(xmas_matrix: &Vec<Vec<char>>, pos: [usize; 2]) -> Result<u32, TryFromIntError> {
+    let nw: [usize; 2] = [
+        usize::try_from(pos[0] as i32 - 1)?,
+        usize::try_from(pos[1] as i32 - 1)?
+    ];
+    let se: [usize; 2] = [
+        usize::try_from(pos[0] as i32 + 1)?,
+        usize::try_from(pos[1] as i32 + 1)?
+    ];
+    let ne: [usize; 2] = [
+        usize::try_from(pos[0] as i32 - 1)?,
+        usize::try_from(pos[1] as i32 + 1)?
+    ];
+    let sw: [usize; 2] = [
+        usize::try_from(pos[0] as i32 + 1)?,
+        usize::try_from(pos[1] as i32 - 1)?
+    ];
 
-fn check_for_cross_mas(xmas_matrix: &Vec<Vec<char>>, pos: [usize; 2]) -> u32 {
     let cross_mas: bool = false;
-
-    // Check cross shape with a as center...
-    // top left to bottom right:
-    let tmp_nw: [i32; 2] = [pos[0] as i32 - 1, pos[1] as i32 - 1];
-    let tmp_se: [i32; 2] = [pos[0] as i32 + 1, pos[1] as i32 + 1];
-
-    // top right to bottom left
-    let tmp_ne: [i32; 2] = [pos[0] as i32 - 1, pos[1] as i32 + 1];
-    let tmp_sw: [i32; 2] = [pos[0] as i32 + 1, pos[1] as i32 - 1];
-
-    let nw: [usize; 2];
-    let se: [usize; 2];
-
-    let ne: [usize; 2];
-    let sw: [usize; 2];
-
-    if
-        usize::try_from(tmp_nw[0]).is_ok() && usize::try_from(tmp_nw[1]).is_ok() &&
-        usize::try_from(tmp_se[0]).is_ok() && usize::try_from(tmp_se[1]).is_ok() &&
-        usize::try_from(tmp_ne[0]).is_ok() && usize::try_from(tmp_ne[1]).is_ok() &&
-        usize::try_from(tmp_sw[0]).is_ok() && usize::try_from(tmp_sw[1]).is_ok()
-    {
-        nw = [usize::try_from(tmp_nw[0]).unwrap(), usize::try_from(tmp_nw[1]).unwrap()];
-        se = [usize::try_from(tmp_se[0]).unwrap(), usize::try_from(tmp_se[1]).unwrap()];
-        ne = [usize::try_from(tmp_ne[0]).unwrap(), usize::try_from(tmp_ne[1]).unwrap()];
-        sw = [usize::try_from(tmp_sw[0]).unwrap(), usize::try_from(tmp_sw[1]).unwrap()];
-    } else {
-        println!("Failed usize conv");
-        return 0;
-    };
-
     if 
         // Check top left to bottom right
         xmas_matrix[nw[0]][nw[1]] != 'A' &&
@@ -86,8 +77,8 @@ fn check_for_cross_mas(xmas_matrix: &Vec<Vec<char>>, pos: [usize; 2]) -> u32 {
         ms.contains(&xmas_matrix[ne[0]][ne[1]]) &&
         ms.contains(&xmas_matrix[sw[0]][sw[1]])
     {
-        return 1;
+        return Ok(1);
     }
 
-    return 0;
+    return Ok(0);
 }

@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
+use std::time::Instant;
 
 const xmas: [char; 4] = ['X','M','A','S'];
 const directions: [[i32; 2]; 8] = [
@@ -15,6 +16,8 @@ const directions: [[i32; 2]; 8] = [
 ];
 
 fn main() {
+    let now = Instant::now();
+ 
     const file_name: &str = "../input.txt";
     let mut xmas_matrix: Vec<Vec<char>> = Vec::new();
 
@@ -33,6 +36,7 @@ fn main() {
         }
     }
     println!("Amount of xmas: {}", count);
+    println!("Elapsed: {:.2?}", now.elapsed());
 }
 
 fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>> where P: AsRef<Path>, {
@@ -46,7 +50,7 @@ fn check_for_xmas(xmas_matrix: &Vec<Vec<char>>, pos: [usize; 2]) -> u32 {
 
     for direction in directions {
         let mut tmp_pos: [usize; 2] = pos.clone();
-        println!("POS: [{},{}], DIR: [{},{}]", tmp_pos[0], tmp_pos[1], direction[0], direction[1]);
+        //println!("POS: [{},{}], DIR: [{},{}]", tmp_pos[0], tmp_pos[1], direction[0], direction[1]);
         let mut is_xmas: bool = true;
         for step in 1..xmas.len(){ // start at m :)
             //print!("{} ", xmas[step]);
@@ -62,7 +66,7 @@ fn check_for_xmas(xmas_matrix: &Vec<Vec<char>>, pos: [usize; 2]) -> u32 {
         }
         if is_xmas {
             counter += 1;
-            println!("Found for pos: [{},{}], dir: [{},{}]", tmp_pos[0], tmp_pos[1], direction[0], direction[1]);
+            //println!("Found for pos: [{},{}], dir: [{},{}]", tmp_pos[0], tmp_pos[1], direction[0], direction[1]);
         }
     }
     return counter;
@@ -82,11 +86,11 @@ fn get_next(xmas_matrix: &Vec<Vec<char>>, pos: [usize; 2], direction: [i32; 2], 
         new_y = usize::try_from(tmp_y).unwrap();
         new_x = usize::try_from(tmp_x).unwrap();
     } else {
-        println!("Failed usize conv");
+        //println!("Failed usize conv");
         return None
     };
 
-    println!("new pos: [{},{}]", new_y, new_x);
+    //println!("new pos: [{},{}]", new_y, new_x);
 
     if new_y >= xmas_matrix.len()
     || new_x >= xmas_matrix[new_y].len()
